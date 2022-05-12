@@ -1,5 +1,21 @@
 {% extends "network/layout.html" %}
+{% load static %}
 
 {% block body %}
-    TODO
+    <div id="all-post">
+        <form method="POST" action="{% url 'new_post' %}">
+            {% csrf_token %}
+            <h5>NewPost</h5>
+            <textarea id="story" name="entry" rows="5" cols="100"></textarea>
+            <br>
+            Image: <input type="file" accept="image/*" name="image">
+            <br>
+            <input type="submit" value="Post">
+        </form>
+    </div>
+
+{% endblock %}
+
+{% block script %}
+<script src="{% static 'network/index.js' %}"></script>
 {% endblock %}
