@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block body %}
+{% if user.is_authenticated %}
     <div id="new-post">
         <form method="POST" action="{% url 'new_post' %}" enctype="multipart/form-data">
             {% csrf_token %}
@@ -13,6 +14,7 @@
             <input type="submit" value="Post">
         </form>
     </div>
+{% endif %}
 
     <div id="all-post">
         <h5>All Posts</h5>
@@ -22,13 +24,11 @@
         {% if p.image %}
         <img src="{{ p.image.url }}" width="500">
         {% endif %}
-        <P>{{p.entry}} <br> by {{p.creator}} @ {{p.created_date}}</P>
+        <P>{{p.entry}} <br> by <a href="{% url 'profile' p.creator.id %}">{{p.creator}}</a> @ {{p.created_date}}</P>
         </li>
         {% endfor %}
         </ul>
     </div>
-
-
 
 {% endblock %}
 

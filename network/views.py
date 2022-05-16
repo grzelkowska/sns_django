@@ -3,17 +3,58 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.contrib.auth.decorators import login_required
 
 from .models import User, Post, Like, Follow
 
 
 def index(request):
-    
+    # user_id = request.user.id
+    # user_liked = is_liked(user_id)
     return render(request, "network/index.html", {
-        "all_posts" : Post.objects.all(),
+        "all_posts" : Post.objects.all().order_by('-created_date'),
+
     })
 
 
+def profile(request, user_id):
+    users_posts = Post.objects.filter(creator=user_id).order_by("-created_date")
+    self_login = False
+    if user_id == request.user.id:
+        self_login = True
+    
+    followers = Follow.objects.filter(following=user_id).count()
+    user_follow = False
+    if Follow.objects.filter(user=request.user):
+        user_follow = True
+
+    following = Follow.objects.filter(user=user_id).count()
+
+    return render(request, "network/profile.html", {
+        "user_profile": User.objects.get(id=user_id),
+        "posts": users_posts,
+        "self_login": self_login,
+        "followers": followers,
+        "user_follow": user_follow,
+        "following": following,
+    })
+
+
+@login_required
+def follow(request, user_id):    # user_id=profile_user / loggedin_user=request.user
+    user = User.objects.get(pk=user_id)
+    if request.method == "POST":
+        if Follow.objects.filter(user=request.user, following=user):
+            following = Follow.objects.filter(user=request.user)
+            following.delete()
+        else:
+            follow_profile = Follow(user=request.user, following=user)
+            follow_profile.save()
+
+    return HttpResponseRedirect(reverse("profile", args=(user.id, )))
+
+    
+@login_required
 def new_post(request):
     if request.method == "POST":
         entry = request.POST['entry']
@@ -23,16 +64,6 @@ def new_post(request):
         new_posting.save()
     
     return HttpResponseRedirect(reverse("index"))
-
-    
-
-
-
-
-
-
-
-
 
 
 def login_view(request):
@@ -85,3 +116,24 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "network/register.html")
+
+
+
+
+
+
+
+
+
+
+# def is_liked(user_id):
+#     is_liked = False
+#     if Like.objects.filter(user=user_id):
+#         is_liked = True
+    
+#     return is_liked
+
+# def count_like(post_id):
+#     num_like = Like.objects.filter(post=post_id).count()
+
+#     return num_like
