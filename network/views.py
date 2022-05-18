@@ -4,21 +4,31 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 
 from .models import User, Post, Like, Follow
 
 
 def index(request):
-    # user_id = request.user.id
-    # user_liked = is_liked(user_id)
-    return render(request, "network/index.html", {
-        "all_posts" : Post.objects.all().order_by('-created_date'),
+    all_posts = Post.objects.all().order_by('-created_date')
 
+    p = Paginator(all_posts, 10)
+    page_number = request.GET.get('page')
+    page_obj = p.get_page(page_number)
+
+    return render(request, "network/index.html", {
+        # "all_posts" : all_posts,
+        "page_obj": page_obj,
     })
 
 
 def profile(request, user_id):
     users_posts = Post.objects.filter(creator=user_id).order_by("-created_date")
+
+    p = Paginator(users_posts, 10)
+    page_number = request.GET.get('page')
+    page_obj = p.get_page(page_number)
+
     self_login = False
     if user_id == request.user.id:
         self_login = True
@@ -32,11 +42,12 @@ def profile(request, user_id):
 
     return render(request, "network/profile.html", {
         "user_profile": User.objects.get(id=user_id),
-        "posts": users_posts,
+        # "posts": users_posts,
         "self_login": self_login,
         "followers": followers,
         "user_follow": user_follow,
         "following": following,
+        "page_obj": page_obj,
     })
 
 
@@ -54,10 +65,15 @@ def following(request, user_id):
     
     following_posts.sort(reverse=True, key=sort_list)
 
+    p = Paginator(following_posts, 10)
+    page_number = request.GET.get('page')
+    page_obj = p.get_page(page_number)
+
 
     return render(request, "network/index.html", {
         "following": following_posts_only,
-        "all_posts": following_posts,
+        # "all_posts": following_posts,
+        "page_obj": page_obj,
     })
 
 
