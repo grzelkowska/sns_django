@@ -40,6 +40,27 @@ def profile(request, user_id):
     })
 
 
+def sort_list(e):
+    return e.created_date
+
+def following(request, user_id):
+    following_posts_only = True
+    following_posts = []
+    user = User.objects.get(pk=user_id)
+    followers = Follow.objects.filter(user=user).values_list('following', flat=True)
+
+    for person in followers:
+        following_posts += Post.objects.filter(creator=person).order_by("-created_date")
+    
+    following_posts.sort(reverse=True, key=sort_list)
+
+
+    return render(request, "network/index.html", {
+        "following": following_posts_only,
+        "all_posts": following_posts,
+    })
+
+
 @login_required
 def follow(request, user_id):    # user_id=profile_user / loggedin_user=request.user
     user = User.objects.get(pk=user_id)

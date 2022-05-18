@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block body %}
-{% if user.is_authenticated %}
+{% if user.is_authenticated and not following %}
     <div id="new-post">
         <form method="POST" action="{% url 'new_post' %}" enctype="multipart/form-data">
             {% csrf_token %}
@@ -17,7 +17,11 @@
 {% endif %}
 
     <div id="all-post">
+        {% if following %}
+        <h5>Following Posts</h5>
+        {% else %}
         <h5>All Posts</h5>
+        {% endif %}
         <ul>
         {% for p in all_posts%}
         <li>
