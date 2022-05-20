@@ -51,6 +51,25 @@ def profile(request, user_id):
     })
 
 
+def delete(request, post_id):
+    if request.method == "POST":
+        deleting_post = Post.objects.get(pk=post_id)
+        deleting_post.delete()
+
+        return HttpResponseRedirect(reverse('profile', args=(request.user.id, )))
+
+
+
+def edit(request, post_id):
+    if request.method == "POST":        
+        editedEntry = request.POST['editedEntry']
+        editingPost = Post.objects.get(pk=post_id)
+        editingPost.entry = editedEntry
+        editingPost.save()
+        # return HttpResponseRedirect(reverse("index"))
+        return HttpResponseRedirect(reverse('profile', args=(request.user.id, )))
+
+
 def sort_list(e):
     return e.created_date
 

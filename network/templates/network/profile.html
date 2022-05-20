@@ -1,4 +1,5 @@
 {% extends "network/layout.html" %}
+{% load static %}
 
 {% block body %}
 
@@ -41,6 +42,20 @@
     {% endif %}
     <P>{{p.entry}} <br> by <a href="{% url 'profile' p.creator.id %}">{{p.creator}}</a> @ {{p.created_date}}</P>
     </li>
+    <div style="display:flex; margin-top:-15px; margin-bottom: 20px;">
+        <form id="edit" action="{% url 'edit' p.id %}" method="post">
+            {% csrf_token %}
+            <div id="editInput">
+                <button id="editInputButton">Edit</button>
+            </div>
+            <div id="editDiv" ></div>
+        </form>
+        <form method="post" action="{% url 'delete' p.id %}">
+            {% csrf_token %}
+            <input type="submit" value="Delete">
+        </form>
+    </div>
+
 {% endfor %}
 </ul>
 <div class="pagination">
@@ -61,4 +76,9 @@
     </span>
 </div>
 
+{% endblock %}
+
+{% block script %}
+
+<script src="{% static 'network/network.js' %}"></script>
 {% endblock %}

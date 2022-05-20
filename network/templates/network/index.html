@@ -3,15 +3,16 @@
 
 {% block body %}
 {% if user.is_authenticated and not following %}
+
     <div id="new-post">
         <form method="POST" action="{% url 'new_post' %}" enctype="multipart/form-data">
             {% csrf_token %}
             <h5>NewPost</h5>
-            <textarea id="story" name="entry" rows="5" cols="100"></textarea>
+            <textarea required id="story" name="entry" rows="5" cols="100"></textarea>
             <br>
             Image: <input type="file" accept="image/*" class="image" name="image">
             <br>
-            <input type="submit" value="Post">
+            <input id="post_button" type="submit" value="Post">
         </form>
     </div>
 {% endif %}
@@ -31,6 +32,24 @@
         {% endif %}
         <p>{{p.entry}}<br> by <a href="{% url 'profile' p.creator.id %}">{{p.creator}}</a> @ {{p.created_date}}</p>
         </li>
+        
+        {% if p.creator == user %}
+        <div style="display:flex; margin-top:-15px; margin-bottom: 20px;">
+            <form id="edit" action="{% url 'edit' p.id %}" method="post">
+                {% csrf_token %}
+                <div id="editInput">
+                    <button id="editInputButton" >Edit</button>
+                </div>
+                <div id="editDiv" ></div>
+            </form>
+            <form method="post" action="{% url 'delete' p.id %}">
+                {% csrf_token %}
+                <input type="submit" value="Delete">
+            </form>
+        </div>
+        
+        {% endif %}
+
         {% endfor %}
         </ul>
         <div class="pagination">
@@ -56,5 +75,7 @@
 {% endblock %}
 
 {% block script %}
-<script src="{% static 'network/index.js' %}"></script>
+
+<script src="{% static 'network/network.js' %}"></script>
 {% endblock %}
+
