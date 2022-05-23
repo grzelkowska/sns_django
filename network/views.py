@@ -63,7 +63,7 @@ def profile(request, user_id):
     
     followers = Follow.objects.filter(following=user_id).count()
     user_follow = False
-    if Follow.objects.filter(user=request.user):
+    if Follow.objects.filter(user=request.user, following_id=user_id):
         user_follow = True
 
     following = Follow.objects.filter(user=user_id).count()
@@ -175,6 +175,7 @@ def user_followers(request, user_id):
         followers += User.objects.filter(pk=id)
 
     return render(request, 'network/user_follow.html', {
+        'header': "Followers",
         "people": followers,
     })
 
@@ -186,6 +187,7 @@ def user_following(request, user_id):
         following += User.objects.filter(pk=id)
 
     return render(request, 'network/user_follow.html', {
+        'header': "Following",
         'people': following
     })
 
