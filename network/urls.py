@@ -13,6 +13,8 @@ urlpatterns = [
     path("following/<int:user_id>", views.following, name="following"),
     path("edit_entry/<int:post_id>", views.edit, name="edit"),
     path("delete_entry/<int:post_id>", views.delete, name="delete"),
+    path("user_following/<int:user_id>", views.user_following, name="user_following"),
+    path("user_follwers/<int:user_id>", views.user_followers, name="user_followers"),
     # API Routes
     path("like_entry", views.like, name="like"),
 ]

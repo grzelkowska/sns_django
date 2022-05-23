@@ -4,7 +4,7 @@
 {% block body %}
 
 <h4>{{ user_profile.username }}</h4>
-<div>Followers: {{followers}} &nbsp; Following: {{following}}</div>
+<div><a href="{% url 'user_followers' user_profile.id %}">Followers: {{followers}}</a> &nbsp; <a href="{% url 'user_following' user_profile.id %}">Following: {{following}}</a></div>
 {% if user.is_authenticated and not self_login %}
 <form method="post" action="{% url 'follow' user_profile.id %}">
     {% csrf_token %}

@@ -33,7 +33,6 @@ def index(request):
     page_obj = p.get_page(page_number)
 
     return render(request, "network/index.html", {
-        # "all_posts" : all_posts,
         "page_obj": page_obj,
     })
 
@@ -71,7 +70,6 @@ def profile(request, user_id):
 
     return render(request, "network/profile.html", {
         "user_profile": User.objects.get(id=user_id),
-        # "posts": users_posts,
         "self_login": self_login,
         "followers": followers,
         "user_follow": user_follow,
@@ -127,7 +125,6 @@ def edit(request, post_id):
         editingPost = Post.objects.get(pk=post_id)
         editingPost.entry = editedEntry
         editingPost.save()
-        # return HttpResponseRedirect(reverse("index"))
         return HttpResponseRedirect(reverse('profile', args=(request.user.id, )))
 
 
@@ -153,7 +150,6 @@ def following(request, user_id):
 
     return render(request, "network/index.html", {
         "following": following_posts_only,
-        # "all_posts": following_posts,
         "page_obj": page_obj,
     })
 
@@ -171,7 +167,30 @@ def follow(request, user_id):    # user_id=profile_user / loggedin_user=request.
 
     return HttpResponseRedirect(reverse("profile", args=(user.id, )))
 
-    
+
+def user_followers(request, user_id):
+    followers_id = Follow.objects.filter(following_id=user_id).values_list('user', flat=True)
+    followers = []
+    for id in followers_id:
+        followers += User.objects.filter(pk=id)
+
+    return render(request, 'network/user_follow.html', {
+        "people": followers,
+    })
+
+
+def user_following(request, user_id):
+    following_id = Follow.objects.filter(user_id=user_id).values_list('following', flat=True)
+    following = []
+    for id in following_id:
+        following += User.objects.filter(pk=id)
+
+    return render(request, 'network/user_follow.html', {
+        'people': following
+    })
+
+
+
 @login_required
 def new_post(request):
     if request.method == "POST":

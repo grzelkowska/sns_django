@@ -1,0 +1,13 @@
+{% extends "network/layout.html" %}
+{% load static %}
+
+{% block body %}
+    
+    <ul>
+        {% for person in people %}
+        <li>
+            <a href="{% url 'profile' person.id %}">{{person}}</a>
+        </li>
+        {% endfor %}
+    </ul>
+{% endblock %}
