@@ -19,6 +19,15 @@ class Post(models.Model):
     def __str__(self):
         return f"{self.entry} by {self.creator}"
 
+    # def serialize(self):
+    #     return {
+    #         'id': self.id,
+    #         'entry': self.entry,
+    #         'creator': self.creator,
+    #         'created_date': self.created_date,
+    #         'image': self.image,
+    #     }
+
 
 class Like(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

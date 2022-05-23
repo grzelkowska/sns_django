@@ -1,18 +1,34 @@
+from tempfile import TemporaryFile
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.core.exceptions import ObjectDoesNotExist
+from django.views.decorators.csrf import csrf_exempt
+import json
 
 from .models import User, Post, Like, Follow
 
 
 def index(request):
     all_posts = Post.objects.all().order_by('-created_date')
+    full_posts = []
+    for post in all_posts:
+        like_dict = count_like(post.id, request.user.id)
+        full_posts.append({
+            'id': post.id,
+            'entry': post.entry,
+            'creator': post.creator,
+            'created_date': post.created_date,
+            'image': post.image,
+            'num_like': like_dict['num_like'],
+            'user_like': like_dict['user_like'],
+        }) 
 
-    p = Paginator(all_posts, 10)
+    p = Paginator(full_posts, 10)
     page_number = request.GET.get('page')
     page_obj = p.get_page(page_number)
 
@@ -24,8 +40,21 @@ def index(request):
 
 def profile(request, user_id):
     users_posts = Post.objects.filter(creator=user_id).order_by("-created_date")
+    full_posts = []
+    for post in users_posts:
+        like_dict = count_like(post.id, user_id)
+        full_posts.append({
+            'id': post.id,
+            'entry': post.entry,
+            'creator': post.creator,
+            'created_date': post.created_date,
+            'image': post.image,
+            'num_like': like_dict['num_like'],
+            'user_like': like_dict['user_like'],
+        })
 
-    p = Paginator(users_posts, 10)
+
+    p = Paginator(full_posts, 10)
     page_number = request.GET.get('page')
     page_obj = p.get_page(page_number)
 
@@ -51,6 +80,38 @@ def profile(request, user_id):
     })
 
 
+def count_like(post_id, user_id):
+    like_dict = {
+        'num_like': 0,
+        'user_like': False,
+    }
+    try:
+        like_dict['num_like'] = Like.objects.filter(post_id=post_id).count()
+        try:
+            if Like.objects.filter(user_id=user_id, post_id=post_id):
+                like_dict['user_like'] = True
+        except ObjectDoesNotExist:
+            pass
+    except ObjectDoesNotExist:
+        pass
+
+    return like_dict
+
+@login_required
+@csrf_exempt
+def like(request):    
+    data = json.loads(request.body)
+    try:
+        like_entry = Like.objects.get(user_id=data['user_id'], post_id=data['post_id'])
+        like_entry.delete()
+    except ObjectDoesNotExist:
+        like_entry = Like(user_id=data['user_id'], post_id=data['post_id'])
+        like_entry.save()
+    
+    return HttpResponse(status=204)
+
+
+@login_required
 def delete(request, post_id):
     if request.method == "POST":
         deleting_post = Post.objects.get(pk=post_id)
@@ -59,7 +120,7 @@ def delete(request, post_id):
         return HttpResponseRedirect(reverse('profile', args=(request.user.id, )))
 
 
-
+@login_required
 def edit(request, post_id):
     if request.method == "POST":        
         editedEntry = request.POST['editedEntry']
@@ -72,6 +133,7 @@ def edit(request, post_id):
 
 def sort_list(e):
     return e.created_date
+
 
 def following(request, user_id):
     following_posts_only = True

@@ -40,9 +40,24 @@
     {% if p.image %}
     <img src="{{ p.image.url }}" width="500">
     {% endif %}
-    <P>{{p.entry}} <br> by <a href="{% url 'profile' p.creator.id %}">{{p.creator}}</a> @ {{p.created_date}}</P>
+    <P>{{p.entry}} <br> by <a href="{% url 'profile' p.creator.id %}">{{p.creator}}</a> @ {{p.created_date}}
+        {% if p.user_like %}
+
+        <button id="p{{p.id}}" onclick="javascript:like('{{ p.id }}')" value="{{p.user_like}}">
+        <i id="i{{p.id}}" class="fa-solid fa-heart"></i><span id="s{{p.id}}">{{ p.num_like }}</span>
+        </button>
+
+        {% else %}
+
+        <button id="p{{p.id}}" id="p{{p.id}}" onclick="javascript:like('{{ p.id }}')" value="{{p.user_like}}">
+        <i id="i{{p.id}}" class="fa-regular fa-heart"></i><span id="s{{p.id}}">{{ p.num_like }}</span>
+        </button>
+        
+        {% endif %}
+    </P>
+    
     </li>
-    <div style="display:flex; margin-top:-15px; margin-bottom: 20px;">
+    <div style="display:flex; margin-top: -15px; margin-bottom: 20px;">
         <form id="edit" action="{% url 'edit' p.id %}" method="post">
             {% csrf_token %}
             <div id="editInput">
@@ -79,6 +94,10 @@
 {% endblock %}
 
 {% block script %}
+<script type="text/javascript">
+    const user_id = "{{ user.id }}"
+</script>
 
 <script src="{% static 'network/network.js' %}"></script>
+
 {% endblock %}
